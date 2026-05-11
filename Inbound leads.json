@@ -1,0 +1,222 @@
+{
+  "name": "Inbound leads",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "HVAC Service Request",
+        "formDescription": "We'll get back to you ",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Name",
+              "placeholder": "Full Name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email",
+              "placeholder": "Email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Problem",
+              "fieldType": "textarea",
+              "placeholder": "Please describe the issue you are experiencing (e.g., AC blowing warm air, furnace making a rattling noise).",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        -304,
+        -64
+      ],
+      "id": "ab952974-c3c9-49be-b625-726547e98fa0",
+      "name": "On form submission",
+      "webhookId": "c84abb04-35e8-4bb0-9753-16dec7e32f7a"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "You are a professional, empathetic, and knowledgeable triage assistant for a premium HVAC service company. A homeowner has just submitted a service request describing a problem with their heating or cooling system.\n\nYour task is to:\n\nAcknowledge their specific issue with empathy.\n\nProvide a very brief, non-binding preliminary assessment of what the common cause might be, explicitly stating that a certified technician will need to diagnose it on-site.\n\nReassure them that our team will contact them shortly to schedule a visit.\n\nConstraints: Keep your response under 4 sentences. Do not quote prices or promise specific repair times. Maintain a reassuring, humanized tone.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -112,
+        -64
+      ],
+      "id": "b127cac9-cc12-42b8-a2e3-da007eae6e60",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -256,
+        144
+      ],
+      "id": "91f1c6fe-51c5-41ab-8a5d-bbcc5f896a20",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "dD7QtxWYtD1KyvoG",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appTh1Zh6reua8Xzu",
+          "mode": "list",
+          "cachedResultName": "Inbound Leads",
+          "cachedResultUrl": "https://airtable.com/appTh1Zh6reua8Xzu"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblXOsK2bIonhjUtY",
+          "mode": "list",
+          "cachedResultName": "Table 1",
+          "cachedResultUrl": "https://airtable.com/appTh1Zh6reua8Xzu/tblXOsK2bIonhjUtY"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $('On form submission').item.json.Name }}",
+            "Email": "={{ $('On form submission').item.json.Email }}",
+            "Problem": "={{ $('On form submission').item.json.Problem }}",
+            "AI Response": "={{ $json.output }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Problem",
+              "displayName": "Problem",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "AI Response",
+              "displayName": "AI Response",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        -64
+      ],
+      "id": "3ebb7641-2b17-49b0-9676-fca3de6c1939",
+      "name": "Create a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "OlxI3wqMF4z74W1o",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Create a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "71dbecee-cb40-440e-8e16-9062c146b5fc",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "091e63d1a4ee3d8ca06f848f00cbcc1a50c4ae300c07493bd7d92524712bb652"
+  },
+  "id": "JejV7sV1IFlM3Zw7",
+  "tags": []
+}
